@@ -131,7 +131,7 @@ import {
   }
   
   // Enable the live webcam view and start detection.
-  function enableCam(event) {
+  async function enableCam(event) {
     if (!handLandmarker) {
       console.log("Wait! objectDetector not loaded yet.");
       return;
@@ -151,11 +151,29 @@ import {
     };
   
     // Activate the webcam stream.
-    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    let err = false;
+    const p = navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
       video.srcObject = stream;
       video.addEventListener("loadeddata", predictWebcam);
+    }).catch((reason) => {
+      console.log("Could not load webcam");
+      console.log(reason)
+      err = true;
     });
+    await p;
+    if (err)
+    {
+      webcamRunning = false;
+      enableWebcamButton.innerText = "ENABLE WEBCAM";
+      document.getElementsByClassName("wy-webcam-err-msg").item(0).style.display = "block";
+    }
+    else
+    {
+      document.getElementsByClassName("wy-webcam-err-msg").item(0).style.display = "none";
+    }
+  
   }
+
   
   let lastVideoTime = -1;
   let results = undefined;
